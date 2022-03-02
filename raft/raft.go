@@ -493,8 +493,8 @@ func (r *Raft) doElection() {
 }
 
 func (r *Raft) handleRequestVote(m pb.Message) {
-	// Q: why `r.Term == m.Term` won't reject?
-	// A: see `Step()`
+	// Q: Why `r.Term == m.Term` won't reject?
+	// A: See `Step()`
 	if r.Term > m.Term {
 		r.sendRequestVoteResponse(m.From, true)
 		return
@@ -512,11 +512,6 @@ func (r *Raft) handleRequestVote(m pb.Message) {
 }
 
 func (r *Raft) handleRequestVoteResponse(m pb.Message) {
-	if r.Term < m.Term {
-		r.becomeFollower(m.Term, None)
-		return
-	}
-
 	r.votes[m.From] = !m.Reject
 	granted := 0
 	quorum := len(r.Prs) / 2
@@ -575,7 +570,7 @@ func (r *Raft) handleAppendEntries(m pb.Message) {
 				idx := r.RaftLog.toSliceIndex(ent.Index)
 				r.RaftLog.entries[idx] = *ent
 				r.RaftLog.entries = r.RaftLog.entries[:idx+1]
-				// the truncation maybe cause stabled index decrement
+				// Truncation maybe cause stabled index decrement
 				r.RaftLog.stabled = min(r.RaftLog.stabled, ent.Index-1)
 			}
 		} else {
